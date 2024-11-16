@@ -17,7 +17,7 @@ set.seed(777)
 
 Problem2
 ```{r}
-t_test_result = data.frame()
+t_test_result = data.frame(mu = numeric(0), mu_hat = numeric(0), p_value = numeric(0), null_hypothesis = numeric(0))
 for(i in 0:6){
   for(j in 1:5000){
     simulated_data = rnorm(30, mean = i, sd = 5)
