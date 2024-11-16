@@ -36,13 +36,13 @@ ggplot(rejection, aes(x = mu, y = null_hypothesis)) +
 ```
 
 ```{r}
-mean <- aggregate(mu_hat ~ mu, data = t_test_result, mean)
-mean <- aggregate(mu_hat ~ mu, data = t_test_results[t_test_result$null_hypothesis == TRUE, ], mean)
+mean_estimate <- aggregate(mu_hat ~ mu, data = t_test_result, mean)
+mean_estimate <- aggregate(mu_hat ~ mu, data = t_test_result[t_test_result$null_hypothesis == TRUE, ], mean)
 
-mean$group <- "mean_hat"
-mean_rejected$group <- "mean_hat_rejected"
+mean_estimate$group <- "mean_hat"
+mean_estimate_rejected$group <- "mean_hat_rejected"
 
-combined_data <- rbind(mean, mean_rejected)
+combined_data <- rbind(mean_estimate, mean_estimate_rejected)
 
 ggplot(combined_data, aes(x = mu, y = mu_hat, color = group)) +
   geom_line() +
