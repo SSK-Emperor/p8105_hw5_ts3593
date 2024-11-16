@@ -1,0 +1,93 @@
+---
+title: "hw5"
+author: "Shi Tiancheng"
+date: "2024-11-15"
+output: github_document
+---
+
+```{r}
+library(tidyverse)
+library(ggplot2)
+library(rvest)
+library(purrr)
+library(broom)
+
+set.seed(777)
+```
+
+Problem2
+```{r}
+t_test_result = data.frame(mu = numeric(0), mu_hat = numeric(0), p_value = numeric(0), null_hypothesis = numeric(0))
+for(i in 0:6){
+  for(j in 1:5000){
+    simulated_data = rnorm(30, mean = i, sd = 5)
+    t_test_result = rbind(t_test_result,c(i, mean(simulated_data),broom::tidy(t.test(simulated_data, mu = 0))$p.value,broom::tidy(t.test(simulated_data, mu = 0))$p.value < 0.05))
+  }
+}
+```
+
+```{r}
+rejection <- aggregate(null_hypothesis ~ mu, data = t_test_reault, mean)
+
+ggplot(rejection, aes(x = mu, y = null_hypothesis)) +
+  geom_line() +
+  geom_point()
+```
+
+```{r}
+mean <- aggregate(mu_hat ~ mu, data = t_test_results, mean)
+mean <- aggregate(mu_hat ~ mu, data = t_test_results[t_test_results$null_hypothesis == TRUE, ], mean)
+
+mean$group <- "mean_hat"
+mean_rejected$group <- "mean_hat_rejected"
+
+combined_data <- rbind(mean, mean_rejected)
+
+ggplot(combined_data, aes(x = mu, y = mu_hat, color = group)) +
+  geom_line() +
+  geom_point()
+```
+
+
+Problem 3
+```{r}
+# read the data and create the variable: city_state
+data = read.csv("homicide-data.csv")
+data = data |> mutate(city_state = paste(city,state,sep=","))
+```
+
+```{r}
+homicides_summary_by_city = 
+  group_by(data,city_state) |>
+  summarize(
+    num = n(),
+    unsolved = (length(which(disposition == "Closed without arrest" | disposition == "Open/No arrest")))) |>
+  filter(city_state != "Tulsa,AL")
+```
+
+```{r}
+# get the homicides data of Baltimore
+Baltimore_homicides = filter(homicides_summary_by_city, city_state == "Baltimore,MD")
+```
+
+```{r}
+prop.test(Baltimore_homicides[['unsolved']],Baltimore_homicides[['num']]) |> broom::tidy()
+```
+
+```{r}
+tidy_data = data.frame()
+for(i in homicides_summary_by_city$city_state){
+  temp = filter(homicides_summary_by_city, city_state == i)
+  temp2 = merge(temp,select(prop.test(temp[['unsolved']],temp[['num']]) |> broom::tidy(),c('estimate','conf.low','conf.high') ))
+  tidy_data = rbind(tidy_data,temp2)
+}
+```
+
+```{r plot3}
+tidy_data |>
+  mutate(city_state = fct_reorder(city_state, estimate)) |>
+  ggplot(aes(x = city_state, y = estimate)) +
+  geom_point() +
+  geom_errorbar(aes(ymin = conf.low, ymax = conf.high)) +
+  theme(axis.text.x = element_text(angle = 70, hjust = 1.2))
+```
