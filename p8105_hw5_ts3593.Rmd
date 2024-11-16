@@ -24,7 +24,7 @@ for(i in 0:6){
     t_test_result = rbind(t_test_result,c(i, mean(simulated_data),broom::tidy(t.test(simulated_data, mu = 0))$p.value,broom::tidy(t.test(simulated_data, mu = 0))$p.value < 0.05))
   }
 }
-colnames("mu","mu_hat","p_value","null_hypothesis")
+colnames(t_test_result) = c("mu","mu_hat","p_value","null_hypothesis")
 ```
 
 ```{r}
