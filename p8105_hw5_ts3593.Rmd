@@ -17,17 +17,18 @@ set.seed(777)
 
 Problem2
 ```{r}
-t_test_result = data.frame(mu = numeric(0), mu_hat = numeric(0), p_value = numeric(0), null_hypothesis = numeric(0))
+t_test_result = data.frame()
 for(i in 0:6){
   for(j in 1:5000){
     simulated_data = rnorm(30, mean = i, sd = 5)
     t_test_result = rbind(t_test_result,c(i, mean(simulated_data),broom::tidy(t.test(simulated_data, mu = 0))$p.value,broom::tidy(t.test(simulated_data, mu = 0))$p.value < 0.05))
   }
 }
+colnames("mu","mu_hat","p_value","null_hypothesis")
 ```
 
 ```{r}
-rejection <- aggregate(null_hypothesis ~ mu, data = t_test_reault, mean)
+rejection <- aggregate(null_hypothesis ~ mu, data = t_test_result, mean)
 
 ggplot(rejection, aes(x = mu, y = null_hypothesis)) +
   geom_line() +
@@ -35,8 +36,8 @@ ggplot(rejection, aes(x = mu, y = null_hypothesis)) +
 ```
 
 ```{r}
-mean <- aggregate(mu_hat ~ mu, data = t_test_results, mean)
-mean <- aggregate(mu_hat ~ mu, data = t_test_results[t_test_results$null_hypothesis == TRUE, ], mean)
+mean <- aggregate(mu_hat ~ mu, data = t_test_result, mean)
+mean <- aggregate(mu_hat ~ mu, data = t_test_results[t_test_result$null_hypothesis == TRUE, ], mean)
 
 mean$group <- "mean_hat"
 mean_rejected$group <- "mean_hat_rejected"
